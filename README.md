@@ -1,4 +1,6 @@
-# Hubot script for sending actions feed to campfire
+# Hubot script for sending actions feed
+
+It will fetch actions feed every 1 minute.
 
 ## Instalation
 
@@ -7,6 +9,8 @@ From your hubot source code folder:
 ```bash
 curl https://raw.github.com/morgoth/hubot-trello_actions/master/src/scripts/trello_actions.coffee > scripts/trello_actions.coffee
 ```
+
+Add `node-trello` to your `package.json` as dependency
 
 You will need authentication token from Trello.
 
