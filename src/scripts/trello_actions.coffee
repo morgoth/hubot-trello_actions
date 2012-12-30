@@ -8,7 +8,7 @@
 #   HUBOT_TRELLO_KEY
 #   HUBOT_TRELLO_TOKEN
 #   HUBOT_TRELLO_BOARD
-#   HUBOT_TRELLO_CAMPFIRE_ROOM (optional)
+#   HUBOT_TRELLO_NOTIFY_ROOM (optional)
 #
 # Commands:
 #
@@ -23,8 +23,8 @@ key     = process.env.HUBOT_TRELLO_KEY
 token   = process.env.HUBOT_TRELLO_TOKEN
 boardId = process.env.HUBOT_TRELLO_BOARD
 
-# Campfire
-notificationRoom = process.env.HUBOT_TRELLO_CAMPFIRE_ROOM || process.env.HUBOT_CAMPFIRE_ROOMS.split(",")[0]
+# Notify room. Defaults to Campfire
+notifyRoom = process.env.HUBOT_TRELLO_NOTIFY_ROOM || process.env.HUBOT_CAMPFIRE_ROOMS.split(",")[0]
 
 trello = new Trello(key, token)
 
@@ -36,7 +36,7 @@ module.exports = (robot) ->
     parts.join(" ")
 
   # https://trello.com/docs/api/board/index.html#get-1-boards-board-id-actions
-  actionFilter = ->
+  actionFilter =
     # "all"
     "addAttachmentToCard,addMemberToBoard,commentCard,createCard,moveCardFromBoard,moveListFromBoard,moveCardToBoard,moveListToBoard,updateCard,updateCheckItemStateOnCard"
 
@@ -47,13 +47,13 @@ module.exports = (robot) ->
     robot.brain.data.trello_last_action_date ||= (new Date()).toISOString()
 
   getFeed = ->
-    trello.get "/1/boards/#{boardId}/actions", {filter: actionFilter(), entities: true, fields: "date", since: lastActionDate()}, (error, data) ->
+    trello.get "/1/boards/#{boardId}/actions", {filter: actionFilter, entities: true, fields: "date", since: lastActionDate()}, (error, data) ->
       if data.length
         messages = []
         storeLastActionDate(data[0].date)
         data.forEach (action) ->
           messages.push formattedAction(action)
-        robot.messageRoom(notificationRoom, messages.join("\n"))
+        robot.messageRoom(notifyRoom, messages.join("\n"))
 
   subscribe = ->
     getFeed()
