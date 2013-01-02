@@ -38,7 +38,7 @@ module.exports = (robot) ->
   # https://trello.com/docs/api/board/index.html#get-1-boards-board-id-actions
   actionFilter =
     # "all"
-    "addAttachmentToCard,addMemberToBoard,commentCard,createCard,moveCardFromBoard,moveListFromBoard,moveCardToBoard,moveListToBoard,updateCard,updateCheckItemStateOnCard"
+    "addAttachmentToCard,addMemberToBoard,addMemberToCard,commentCard,createCard,moveCardFromBoard,moveListFromBoard,moveCardToBoard,moveListToBoard,updateCard,updateCheckItemStateOnCard"
 
   storeLastActionDate = (date) ->
     robot.brain.data.trello_last_action_date = date
