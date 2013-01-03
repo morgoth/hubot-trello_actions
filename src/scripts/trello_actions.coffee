@@ -36,14 +36,17 @@ module.exports = (robot) ->
     parts.join(" ")
 
   formattedEntity = (entity) ->
-    if entity.type in ["card", "comment", "checkItem"]
+    if entity.type in ["card", "checkItem"]
+      # Display card title in quotes
       "\"#{entity.text}\""
+    else if entity.type == "comment"
+      # Display comment content in new line
+      "\n#{entity.text}"
     else
       entity.text
 
   # https://trello.com/docs/api/board/index.html#get-1-boards-board-id-actions
   actionFilter =
-    # "all"
     "addAttachmentToCard,addMemberToBoard,addMemberToCard,commentCard,createCard,moveCardFromBoard,moveListFromBoard,moveCardToBoard,moveListToBoard,updateCard,updateCheckItemStateOnCard"
 
   storeLastActionDate = (date) ->
@@ -57,7 +60,7 @@ module.exports = (robot) ->
       if data.length
         messages = []
         storeLastActionDate(data[0].date)
-        data.forEach (action) ->
+        data.reverse().forEach (action) ->
           messages.push formattedAction(action)
         robot.messageRoom(notifyRoom, messages.join("\n"))
 
