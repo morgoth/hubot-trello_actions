@@ -32,8 +32,14 @@ module.exports = (robot) ->
   formattedAction = (action) ->
     parts = ["[Trello]"]
     action.entities.forEach (entity) ->
-      parts.push entity.text
+      parts.push formattedEntity(entity)
     parts.join(" ")
+
+  formattedEntity = (entity) ->
+    if entity.type in ["card", "comment", "checkItem"]
+      "\"#{entity.text}\""
+    else
+      entity.text
 
   # https://trello.com/docs/api/board/index.html#get-1-boards-board-id-actions
   actionFilter =
