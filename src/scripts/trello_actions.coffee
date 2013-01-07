@@ -7,7 +7,7 @@
 # Configuration:
 #   HUBOT_TRELLO_KEY
 #   HUBOT_TRELLO_TOKEN
-#   HUBOT_TRELLO_BOARD
+#   HUBOT_TRELLO_BOARDS (separated by comma)
 #   HUBOT_TRELLO_NOTIFY_ROOM (optional)
 #
 # Commands:
@@ -19,9 +19,9 @@ Trello = require "node-trello"
 feedFrequency = 60000
 
 # Trello
-key     = process.env.HUBOT_TRELLO_KEY
-token   = process.env.HUBOT_TRELLO_TOKEN
-boardId = process.env.HUBOT_TRELLO_BOARD
+key    = process.env.HUBOT_TRELLO_KEY
+token  = process.env.HUBOT_TRELLO_TOKEN
+boards = process.env.HUBOT_TRELLO_BOARDS
 
 # Notify room. Defaults to Campfire
 notifyRoom = process.env.HUBOT_TRELLO_NOTIFY_ROOM || process.env.HUBOT_CAMPFIRE_ROOMS.split(",")[0]
@@ -30,10 +30,8 @@ trello = new Trello(key, token)
 
 module.exports = (robot) ->
   formattedAction = (action) ->
-    parts = ["[Trello]"]
-    action.entities.forEach (entity) ->
-      parts.push formattedEntity(entity)
-    parts.join(" ")
+    entities = action.entities.map(formattedEntity)
+    ["[Trello]"].concat(entities).join(" ")
 
   formattedEntity = (entity) ->
     if entity.type in ["card", "checkItem"]
@@ -49,23 +47,22 @@ module.exports = (robot) ->
   actionFilter =
     "addAttachmentToCard,addMemberToBoard,addMemberToCard,commentCard,createCard,moveCardFromBoard,moveListFromBoard,moveCardToBoard,moveListToBoard,updateCard,updateCheckItemStateOnCard"
 
-  storeLastActionDate = (date) ->
-    robot.brain.data.trello_last_action_date = date
+  storeLastActionDate = (board, date) ->
+    robot.brain.data.trello_last_action_dates[board] = date
 
-  lastActionDate = ->
-    robot.brain.data.trello_last_action_date ||= (new Date()).toISOString()
+  lastActionDate = (board) ->
+    robot.brain.data.trello_last_action_dates ||= {}
+    robot.brain.data.trello_last_action_dates[board] ||= (new Date()).toISOString()
 
-  getFeed = ->
-    trello.get "/1/boards/#{boardId}/actions", {filter: actionFilter, entities: true, fields: "date", since: lastActionDate()}, (error, data) ->
+  getFeed = (board) ->
+    trello.get "/1/boards/#{board}/actions", {filter: actionFilter, entities: true, fields: "date", since: lastActionDate(board)}, (error, data) ->
       if data.length
-        messages = []
-        storeLastActionDate(data[0].date)
-        data.reverse().forEach (action) ->
-          messages.push formattedAction(action)
+        storeLastActionDate(board, data[0].date)
+        messages = data.reverse().map(formattedAction)
         robot.messageRoom(notifyRoom, messages.join("\n"))
 
   subscribe = ->
-    getFeed()
+    boards.split(",").forEach(getFeed)
 
     setTimeout (->
       subscribe()

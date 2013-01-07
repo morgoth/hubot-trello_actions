@@ -24,7 +24,7 @@ Set config variables:
 
 * HUBOT_TRELLO_KEY (You will find yours at https://trello.com/1/appKey/generate)
 * HUBOT_TRELLO_TOKEN
-* HUBOT_TRELLO_BOARD
+* HUBOT_TRELLO_BOARDS (You can specify more than one by separating them by comma)
 * HUBOT_TRELLO_NOTIFY_ROOM (optional, defaults to campfire room)
 
 ## Copyright
